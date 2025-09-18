@@ -3,119 +3,190 @@ title: "Homework 2 Report"
 output: html_document
 ---
 
-
 ## Name
 
-Please enter your name here.
+Anjie Liu
 
 ### Setup
 
 Read in the data with `read_csv()` and store the data as an R object named `dataset`. Check the data to make sure all of the expected observations and variables are there.
 
-
-```{r}
+```{r message=FALSE}
 ## Load the data and any necessary packages here.
-
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+dataset <- read_csv("maacs.csv.gz")
+dataset
 ```
 
 ## Part 1
 
-We will first consider the relationship between FEV1 and age. In general, it is expected that as children get older (and hence, larger in size), their FEV1 values should get higher. 
+We will first consider the relationship between FEV1 and age. In general, it is expected that as children get older (and hence, larger in size), their FEV1 values should get higher.
 
-Consider the statement "FEV1 values in children are higher in older children relative to younger children". 
+Consider the statement "FEV1 values in children are higher in older children relative to younger children".
 
-Write a function in R that takes the `dataset` object as an argument and returns `TRUE` if the statement above is true for the dataset and `FALSE` otherwise. 
+Write a function in R that takes the `dataset` object as an argument and returns `TRUE` if the statement above is true for the dataset and `FALSE` otherwise.
 
-NOTE: In order to write this function, you will need to translate the statement above into something that can be checked with the data. There are many ways in which you can do that translation correctly and you only need to pick one way here. 
+NOTE: In order to write this function, you will need to translate the statement above into something that can be checked with the data. There are many ways in which you can do that translation correctly and you only need to pick one way here.
 
 NOTE: For this part, do not use any plots.
 
 ```{r}
 ## Write your function here
-
+# return true if there is a positive association between age and FEV1 values of children
+# assume linear association
+isPostivelyAssociated <- function(dataset) {
+  corrcoef <- cor(dataset$age, dataset$fev1, use = "complete.obs")
+  return(corrcoef > 0)
+}
+isPostivelyAssociated(dataset)
 ```
 
+> Based on the statement, we are interested in whether FEV1 values in children are positively correlated children's age. The `isPositivelyAssociated` function is designed accordingly such that it returns `TRUE` if there is a positive association between ages and FEV1 values of children. After the execution of the function, we observe that the output is `TRUE`, meaning that FEV1 values and ages of children have a positive correlation coefficient. Thus, we know that older age tends to happen together with higher FEV1 values for children. This statistic supports the statement that "FEV1 values in children are higher in older children relative to younger children".
 
 ## Part 2
 
 Fit a linear regression model with FEV1 as the outcome and age as a predictor.
 
-How much does FEV1 change for a 1-year increase in the child's age? 
+How much does FEV1 change for a 1-year increase in the child's age?
 
 ```{r}
 ## Add your code here
-
+lm(fev1 ~ age,, data = dataset)
 ```
-
 
 Write your data analysis statement interpreting the regression model here:
 
-
+> The output of the linear regression model reveals that the coefficient is 0.171. This means, on average, ceteris paribus, FEV1 value increases by 0.171 liters as a child gets 1 year older.
 
 ## Part 3
 
-Develop **three** supporting premises derived from the data that support the statement you wrote in Part 2. These can be plots, other summary statistics, or model results. 
+Develop **three** supporting premises derived from the data that support the statement you wrote in Part 2. These can be plots, other summary statistics, or model results.
 
-NOTE: 
+NOTE:
 
-* At least one supporting premise should use a plot.
+-   At least one supporting premise should use a plot.
 
-* Do not use the code you write in Part 1 as a supporting premise
-
-```{r}
-## Add your code here
-
-```
-
+-   Do not use the code you write in Part 1 as a supporting premise.
 
 Write the three supporting premise statements here:
 
-1. 
+> 1.  The scatter plot of FEV1 vs. age of children has a positive trend.
 
-2. 
+> 2.  The 95% confidence interval for the regression slope is strictly positive.
 
-3. 
-
+> 3.  Box plots of FEV1 grouped by age show higher medians and interquartile ranges in older age groups.
 
 ## Part 4
 
-For each of the supporting premises above, write a function that takes the `dataset` object as an argument and returns `TRUE` if the supporting premise statement above is true for the dataset and `FALSE` otherwise. 
+For each of the supporting premises above, write a function that takes the `dataset` object as an argument and returns `TRUE` if the supporting premise statement above is true for the dataset and `FALSE` otherwise.
 
 For statements involving plots, instead of returning `TRUE` or `FALSE`, you function should do two things:
 
-1. Produce the plot that is used in the statement
+1.  Produce the plot that is used in the statement
 
-2. Produce a hypothetical version of the plot in the event that the statement is true. This can be done using simulated data or by simply hand drawing a plot.
+2.  Produce a hypothetical version of the plot in the event that the statement is true. This can be done using simulated data or by simply hand drawing a plot.
 
+Execute each of your function and show that produce the expected output.
 
 ```{r}
 ## Function for supporting premise statement 1
+plot_scatter <- function(dataset) {
+  
+  # --- Simulate positively correlated data ---
+  set.seed(20250918)  # for reproducibility
+  n <- 100
+  x <- rnorm(n)
+  y <- 0.8 * x + rnorm(n, sd = 0.3)  # positive correlation
+  sim_data <- data.frame(x = x, y = y)
 
+  # First ggplot: Simulated data
+  p1 <- ggplot(sim_data, aes(x = x, y = y)) +
+    geom_point(color = "black", alpha = 0.7) +
+    labs(
+      title = "Simulated Positively Correlated Data",
+      x = "Simulated X",
+      y = "Simulated Y"
+    ) +
+    theme_minimal()
+
+  # Second ggplot: From given dataset
+  # Dynamically map aesthetics using aes_string()
+  p2 <- ggplot(dataset, aes(x = age, y = fev1)) +
+    geom_point(color = "black", alpha = 0.7, na.rm=TRUE) +
+    labs(
+      title = paste("Fev1 vs. Age of Children"),
+      x = "Age",
+      y = "Fev1 Score"
+    ) +
+    theme_minimal()
+
+  # Arrange both plots side by side
+  grid.arrange(p1, p2, ncol = 2)
+}
+
+plot_scatter(dataset)
 ```
 
+> We observe from the right plot that scatter plot of FEV1 vs. age of children has a positive trend.
 
 ```{r}
 ## Function for supporting premise statement 2
+isSlopeCI <- function(dataset) {
+  # Fit linear model
+  model <- lm(fev1 ~ age,, data = dataset)
+  
+  # Get 95% confidence interval for slope (X coefficient)
+  ci <- confint(model, level = 0.95)["age", ]  # Extract slope CI
+  
+  # Check conditions
+  return((ci[1] > 0) && (ci[2] > 0))
+}
 
+isSlopeCI(dataset)
 ```
+
+> Since the function returns `TRUE`, we know that the 95% confidence interval for the regression slope is positive.
 
 
 ```{r}
 ## Function for supporting premise statement 3
+plot_box <- function(dataset) {
+  # Simulate data: age from 5 to 17
+  set.seed(123)  # For reproducibility
+  n <- 300
+  x <- sample(5:17, n, replace = TRUE)
+  y <- 0.2 * x + rnorm(n, mean = 0, sd = 0.5)  # Positively correlated
+  
+  data <- data.frame(x = x, y = y)
+  
+  # Boxplot 1: Overall FEV1 values for ages 5–17
+  p1 <- ggplot(data, aes(x = as.factor(x), y = y)) +
+    geom_boxplot(fill = "black") +
+    labs(title = "Simulated Boxplot", x = "Age", y = "Simulated FEV1") +
+    theme_minimal()
+  
+  # Boxplot 2: FEV1 grouped by age
+  p2 <- ggplot(dataset, aes(x = as.factor(floor(age)), y = fev1)) +
+    geom_boxplot(fill = "black", na.rm=TRUE) +
+    labs(title = "FEV1 Grouped by Age", x = "Age", y = "FEV1") +
+    theme_minimal()
+  
+  # Arrange side by side
+  grid.arrange(p1, p2, ncol = 2)
+}
 
+plot_box(dataset)
 ```
 
-Execute each of your function and show that the produce the expected output.
-
-
-
+> Based on the right box plot, we observe that the box plots of FEV1 grouped by age show higher medians and interquartile ranges in older age groups than younger age groups.
 
 ## Part 5
 
-Describe one alternative to the primary statement "FEV1 values in children are higher in older children relative to younger children". 
+Describe one alternative to the primary statement "FEV1 values in children are higher in older children relative to younger children".
 
 Create a fault tree for the alternative outcome describing how the alternative outcome could be realized in the data even if the primary statement were true.
 
 Your fault tree should be created as a separate image and does not need to be created in R. Upload the image of the fault tree to Canvas.
-
-
