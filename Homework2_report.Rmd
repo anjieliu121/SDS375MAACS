@@ -54,7 +54,7 @@ How much does FEV1 change for a 1-year increase in the child's age?
 
 ```{r}
 ## Add your code here
-lm(fev1 ~ age,, data = dataset)
+lm(fev1 ~ age, data = dataset)
 ```
 
 Write your data analysis statement interpreting the regression model here:
@@ -77,7 +77,7 @@ Write the three supporting premise statements here:
 
 > 2.  The 95% confidence interval for the regression slope is strictly positive.
 
-> 3.  Box plots of FEV1 grouped by age show higher medians and interquartile ranges in older age groups.
+> 3.  Box plots show higher medians in older children.
 
 ## Part 4
 
@@ -181,7 +181,7 @@ plot_box <- function(dataset) {
 plot_box(dataset)
 ```
 
-> Based on the right box plot, we observe that the box plots of FEV1 grouped by age show higher medians and interquartile ranges in older age groups than younger age groups.
+> Based on the right box plot, we observe that the box plots of FEV1 grouped by age show higher medians in older age groups than younger age groups.
 
 ## Part 5
 
